@@ -8,6 +8,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const postsRouter = require("./routes/postsRoute");
+const userRouter = require("./routes/userRoute");
 
 // log request
 app.use(morgan("tiny"));
@@ -19,6 +20,7 @@ app.use(cors());
 
 // use router
 app.use("/posts", postsRouter);
+app.use("/user", userRouter);
 
 // home route
 app.get("/", (req, res) => {

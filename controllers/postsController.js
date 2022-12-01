@@ -13,15 +13,16 @@ const getPosts = async (req, res) => {
 
 // create post
 const createPost = async (req, res) => {
+  const userId = req.user._id;
   try {
-    const post = await Post.create({ ...req.body });
+    const post = await Post.create({ ...req.body, userId });
     res.status(201).json(post);
   } catch (error) {
     res.status(409).json({ error: error.message });
   }
 };
 
-// update and like post
+// update post
 const updatePost = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -53,9 +54,32 @@ const deletePost = async (req, res) => {
   }
 };
 
+// like post
+const likePost = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ error: "Invalid Post Id!" });
+  }
+
+  try {
+    const post = await Post.findOne({ _id: id });
+    const index = post.likes.findIndex((_id) => _id === String(req.user._id));
+    if (index === -1) {
+      post.likes.push(req.user._id.toString());
+    } else {
+      post.likes = post.likes.filter((_id) => _id !== String(req.user._id));
+    }
+    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getPosts,
   createPost,
   updatePost,
   deletePost,
+  likePost,
 };
