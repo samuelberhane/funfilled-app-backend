@@ -22,9 +22,6 @@ const userSignup = async (req, res) => {
   if (!validator.isEmail(email))
     return res.status(404).json({ error: "Invalid Email Address!" });
 
-  if (!validator.isStrongPassword(password))
-    return res.status(404).json({ error: "Password Is Not Strong!" });
-
   try {
     const userExists = await User.findOne({ email });
     if (userExists)
@@ -41,11 +38,9 @@ const userSignup = async (req, res) => {
       email,
       password: hashPassword,
     });
-    const token = jwt.sign(
-      { _id: user._id, username: `${user.firstname} ${user.lastname}` },
-      process.env.SECRET,
-      { expiresIn: "8h" }
-    );
+    const token = jwt.sign({ _id: user._id }, process.env.SECRET, {
+      expiresIn: "8h",
+    });
     res.status(200).json({ token, user });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -73,14 +68,9 @@ const userLogin = async (req, res) => {
     const checkPassword = await bcrypt.compare(password, user.password);
     if (!checkPassword)
       return res.status(400).json({ error: "Incorrect Password!" });
-    const token = jwt.sign(
-      {
-        _id: user._id,
-        username: `${user.firstname} ${user.lastname}`,
-      },
-      process.env.SECRET,
-      { expiresIn: "8h" }
-    );
+    const token = jwt.sign({ _id: user._id }, process.env.SECRET, {
+      expiresIn: "8h",
+    });
     res.status(200).json({ token, user });
   } catch (error) {
     res.status(500).json({ error: error.message });
